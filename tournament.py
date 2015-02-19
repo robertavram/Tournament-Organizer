@@ -8,24 +8,29 @@ import psycopg2
 
 def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
+    
     return psycopg2.connect("dbname=tournament")
 
 
 def createTournament(tname=''):
     """Creates a tournament or returns false if the tournament name exists in the Database"""
+    
     # Using a unique Name and a unique ID might seem redundant, but this function
     # could be modified later to allow same names and still preserve proper structure
-    if len(tname)<1:
+    if not tname:
         raise ValueError("Please give a tournament name")
         return
+    
     db = connect()
     c = db.cursor()
+    
     query = """
        insert into tour(name) values (%s);
     """
     result = True
+    
     try:
-        c.execute(query,(tname,))
+        c.execute(query, (tname,))
     except:
         print 'Tournament name already exists, please choose another name, meanwhile continuing'
         result = False
@@ -36,8 +41,8 @@ def createTournament(tname=''):
     return result
 
 def deleteMatches(tournament='Default Tournament'):
-    """Remove all the match records from the database."""
-    
+    """Remove all the match records from the database
+    For one particular tournament"""
     
     db = connect()
     c = db.cursor()
@@ -55,40 +60,42 @@ def deleteMatches(tournament='Default Tournament'):
 
 def deletePlayers(tournament="Default Tournament", all=False):
     """Remove all the player records from the tournament, if all is true, delete all from the database."""
-    db = connect();
+    db = connect()
     c = db.cursor()
     
     if all:
         query = """
             delete from player;
         """
+        c.execute(query)
     else:
         query = """
             delete from t_player using tour where t_player.t_id = tour.id and tour.name = %s;
         """
-    c.execute(query,(tournament,))
+        c.execute(query, (tournament,))
+    
     db.commit()
     db.close()
     return
 
-def countPlayers():
+def countPlayers(tournament="Default Tournament"):
     """Returns the number of players currently registered."""
-    tournament = "Default Tournament"
+    
     db = connect()
     c = db.cursor()
     query = """
         select count(t_player.id) from t_player, tour where t_player.t_id = tour.id and tour.name = %s;
     """
-    c.execute(query,(tournament,))
+    c.execute(query, (tournament,))
     result = c.fetchone()[0]
     db.close()
     return result;
     
 def enrollPlayer(c, player_id, tournament):
-    query2 = """
+    query = """
         insert into t_player (t_id, player) values ((select id from tour where name = %s), %s);
     """
-    result = c.execute(query2,(tournament,player_id))
+    result = c.execute(query, (tournament, player_id))
 
 def registerPlayer(name, tournament="Default Tournament", existingId=False):
     """Adds a player to the tournament database.
@@ -99,24 +106,24 @@ def registerPlayer(name, tournament="Default Tournament", existingId=False):
     Args:
       name: the player's full name (need not be unique).
     """
-    # for the purpose of this exercise we assume that all players are new,
+    # For the purpose of this exercise we assume that all players are new,
     # this because the names must not be unique;
     # in real life we would ask the player for his player id (maybe present on an issued registration card)
     # and enroll him in directly in the tournament if he has been previously registered
     db = connect()
     c = db.cursor()
     
-    #check if an existing id was provided if so use that to enroll in the default tournament
+    # Check if an existing id was provided if so use that to enroll in the default tournament
     if existingId:
         player_id = existingId
     else:
-        query1 = """
+        query = """
             insert into player (name) values (%s) RETURNING id;
         """
-        c.execute(query1,(name,))
+        c.execute(query, (name,))
         player_id = c.fetchone()[0]
     
-    #now enroll this player into the tournament
+    # Now enroll this player into the tournament
     enrollPlayer(c, player_id, tournament)
     
     db.commit()
@@ -145,7 +152,7 @@ def playerStandings(tournament = "Default Tournament"):
             where t_player_wins_matches.t_playerid = t_player.id and
             t_player.player = player.id and t_player.t_id = tour.id and tour.name = %s order by wins desc; 
         '''
-    c.execute(query,(tournament,))
+    c.execute(query, (tournament,))
     result = c.fetchall()
     db.close()
     return result
@@ -172,12 +179,12 @@ def playerSupStandings(tournament="Default Tournament"):
             from sup_standings, t_player, tour where sup_standings.id = t_player.id and t_player.t_id = tour.id and tour.name=%s 
             order by wins desc, opp_wins desc nulls last;
         """
-    c.execute(query,(tournament,))
+    c.execute(query, (tournament,))
     result = c.fetchall()
     db.close()
     return result
 
-def setPairing(player1, player2, tournament = "Default Tournament"):
+def setPairing(player1, player2, tournament="Default Tournament"):
     """Given 2 players registered in a tournament and the tournament name,
         returns the id of the match that will have to be played.
 
@@ -190,37 +197,34 @@ def setPairing(player1, player2, tournament = "Default Tournament"):
     """
     db = connect()
     c = db.cursor()
-    #we look by for which round to play by checking the match count for either user..
+    
+    # We look by for which round to play by checking the match count for either user..
     query1 = """
         select tplayer_matches.count from tplayer_matches, tour 
         where tour.name=%s and tour.id = t_id and tplayer_matches.id = %s;
     """
-    c.execute(query1,(tournament,player1))
-    round_no = c.fetchone()[0]+1
-    #print "round_no :%s"%round_no
+    c.execute(query1, (tournament, player1))
+    round_no = c.fetchone()[0] + 1
     
-    #check if this round_no exists in this tournament already, otherwise create a new round
+    # Check if this round_no exists in this tournament already, otherwise create a new round
     check_round_q = """
         select round.id from round, tour where round.t_id = tour.id and tour.name=%s and round.r_no = %s; 
     """
-    c.execute(check_round_q,(tournament,round_no))
+    c.execute(check_round_q, (tournament, round_no))
     round_id = c.fetchone()
-    if round_id:
-        #print "round_id exists:%s"%round_id
-        pass
-    else:
-        #create a new round
-        c.execute("insert into round (t_id, r_no) values ((select id from tour where name = %s),%s) returning round.id;",(tournament,round_no))
-        round_id = c.fetchone()[0]
-        #print "round_id new:%s"%round_id
     
-    # create a new match for this round for these players
+    if not round_id:
+        # Create a new round
+        c.execute("insert into round (t_id, r_no) values ((select id from tour where name = %s),%s) returning round.id;", (tournament, round_no))
+        round_id = c.fetchone()[0]
+    
+    # Create a new match for this round for these players
     query2 ="""
         insert into tmatch (r_id, player1, player2) values (%s,%s,%s) returning tmatch.id;
     """
-    c.execute(query2,(round_id,player1,player2))
+    c.execute(query2, (round_id, player1, player2))
     matchid = c.fetchone()[0]
-    #print "match id :%s"%matchid
+    
     db.commit()
     db.close()
     return matchid
@@ -240,9 +244,9 @@ def setMatchResult(matchid, winner, loser, draw=False):
         insert into mresult (tmatchid, winner, loser, draw) values (%s,%s,%s,%s);
     """
     if draw:
-        c.execute(query1,(matchid,None,None,draw))
+        c.execute(query1, (matchid, None, None, draw))
     else:
-        c.execute(query1,(matchid,winner,loser,draw))
+        c.execute(query1, (matchid, winner, loser, draw))
     db.commit()
     db.close()
     return
@@ -257,10 +261,10 @@ def reportMatch(winner, loser, tournament="Default Tournament", draw=False):
       loser:  the id number of the player who lost if not draw
       draw: boolean, true or false
     """
-    #set up the match
+    # Set up the match
     matchid = setPairing(winner, loser, tournament)
     
-    #store the result
+    # Store the result
     setMatchResult(matchid, winner, loser, draw)
     
     return
@@ -280,11 +284,11 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
-    a = playerStandings()
-    i=0;
-    result=[];
-    while i<len(a)-1:
-        result.append((a[i][0],a[i][1],a[i+1][0],a[i+1][1]));
+    ps = playerStandings()
+    i = 0
+    result = []
+    while i < len(ps)-1:
+        result.append((ps[i][0], ps[i][1], ps[i+1][0], ps[i+1][1]));
         i+=2
     return result
 
@@ -302,52 +306,53 @@ def swissSupPairings(tournament="Default Tournament"):
     """
     standings = playerSupStandings(tournament)
     
-    #list of player ids
+    # List of player ids
     lid = [] 
-    #list of player pairs
+    # List of player pairs
     lpp = []
     
     for row in standings:
-        #print row
         lid.append(row[0])
     
-    #print lid
     if (len(lid)%2 == 1):
         db = connect()
         c = db.cursor()
-        #iterate backwards on the list and find the position of the first element that doesn't have a bye yet
-        #make sure that the particular position is not even (has to be 1,3,5,7 etc) if even then move the element one position down and
-        #add a none list element right after it
-        for i in range(len(lid)-1,-1,-1):
+        
+        # Iterate backwards on the list and find the position of the first element that doesn't have a bye yet.
+        # Make sure that the particular position is not even (has to be 1,3,5,7 etc) if even then move the element one position down and
+        # add a none list element right after it
+        for i in range(len(lid)-1, -1, -1):
             elm = lid[i]
-            #query to see if this particular id has previously had a bye
-            c.execute("select matches, opponents from matches_vs_opp where id=%s",(elm,))
+            
+            # Query to see if this particular id has previously had a bye
+            c.execute("select matches, opponents from matches_vs_opp where id=%s", (elm,))
             cresult = c.fetchone()
-            if (cresult) and (cresult[0]!=cresult[1]):
+            if (cresult) and (cresult[0] != cresult[1]):
                 continue;
             else:
-                if (i%2>0):
-                    #moving the element one back and adding the bye
-                    #this is to ensure that byes are never the first elements in the pair
+                if (i%2 > 0):
+                    # Moving the element one back and adding the bye.
+                    # This is to ensure that byes are never the first elements in the pair.
                     lid.insert(i-1, lid.pop(i))
-                    lid.insert(i,None)
-                    break;
+                    lid.insert(i, None)
+                    break
                 else:
-                    #print "just add a bye after the element"
-                    lid.insert(i+1,None)
-                    break;
-        db.close();
-    #print lid   
+                    # Just add a bye after the element.
+                    lid.insert(i+1, None)
+                    break
+        db.close()
+    
     i = 0;
-    while i<len(lid):
-        #this try can be useful if somehow an uneven list gets passed through.
+    while i < len(lid):
+        
+        # This try can be useful if somehow an uneven list gets passed through.
         try: lid[i+1]
         except:
-            raise ValueError("The list has an uneven number of players, make sure that you add a bye")
+            raise Exception("The list has an uneven number of players, make sure that you add a bye")
             break;
-        pair = (lid[i],lid[i+1])
+        pair = (lid[i], lid[i+1])
         lpp.append(pair)
-        i+=2
+        i += 2
         
     return lpp
 

@@ -98,5 +98,5 @@ create view matches_vs_opp as
 
 
 
-
+-- insert the Default Tournament after the database is created
 insert into tour(name) values ('Default Tournament');
