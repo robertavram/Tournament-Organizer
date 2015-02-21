@@ -174,13 +174,33 @@ def playerSupStandings(tournament="Default Tournament"):
     """
     db = connect()
     c = db.cursor()
-    query="""
+    query = """
             select sup_standings.id, sup_standings.name, sup_standings.wins, sup_standings.opp_wins 
             from sup_standings, t_player, tour where sup_standings.id = t_player.id and t_player.t_id = tour.id and tour.name=%s 
             order by wins desc, opp_wins desc nulls last;
-        """
+            """
     c.execute(query, (tournament,))
-    result = c.fetchall()
+    stand = c.fetchall()
+    
+    # Make a dict with all the players and their opponents
+    pod = {}
+    query2 = """
+             select id as player, opponent from opponent
+             """
+    c.execute(query2)
+    # Player opponent list - a list of all players and their opponents
+    pol = c.fetchall()
+    
+    
+    for row in pol:
+        if row[0] in pod:
+            pod[row[0]].append(row[1])
+        else:
+            pod[row[0]]=[row[1]]
+    
+    
+        
+    
     db.close()
     return result
 
