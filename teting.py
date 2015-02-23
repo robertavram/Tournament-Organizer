@@ -1,14 +1,14 @@
 import copy
 
+matches = [[1,2],[1,3],
+              [5,6],[5,2],
+              [3,4],[3,1],
+              [4,6],[4,3],
+              [2,1],[2,5],
+              [6,5],[6,4]]
+
 #===============================================================================
-# matches = [[1,2],[1,3],
-#              [5,6],[5,2],
-#              [3,4],[3,1],
-#              [4,6],[4,3],
-#              [2,1],[2,5],
-#              [6,5],[6,4]]
-#===============================================================================
-#===============================================================================
+# 
 # matches = [['a', 'f'], ['a', 'b'], 
 #            ['b', 'a'], ['b', 'd'], 
 #            ['c', 'd'], ['c', 'e'], 
@@ -16,13 +16,18 @@ import copy
 #            ['e', 'c'], ['e', 'f'], 
 #            ['f', 'a'], ['f', 'e']]
 #===============================================================================
-matches = [['a', 'd'], ['a', 'e'], ['a', 'i'], ['a', 'f'], ['a', 'h'], ['a', 'g'], ['b', 'i'], ['b', 'c'], ['b', 'j'], ['b', 'e'], ['b', 'h'], ['b', 'f'], ['c', 'b'], ['c', 'g'], ['c', 'f'], ['c', 'e'], ['c', 'j'], ['c', 'd'], ['d', 'a'], ['d', 'i'], ['d', 'h'], ['d', 'j'], ['d', 'c'], ['d', 'e'], ['e', 'a'], ['e', 'c'], ['e', 'b'], ['e', 'd'], ['e', 'f'], ['e', 'h'], ['f', 'g'], ['f', 'c'], ['f', 'a'], ['f', 'i'], ['f', 'e'], ['f', 'b'], ['g', 'f'], ['g', 'c'], ['g', 'h'], ['g', 'j'], ['g', 'a'], ['g', 'i'], ['h', 'd'], ['h', 'j'], ['h', 'g'], ['h', 'a'], ['h', 'e'], ['h', 'b'], ['i', 'b'], ['i', 'd'], ['i', 'j'], ['i', 'a'], ['i', 'f'], ['i', 'g'], ['j', 'i'], ['j', 'h'], ['j', 'b'], ['j', 'd'], ['j', 'g'], ['j', 'c']]
+#===============================================================================
+#matches = [['a', 'd'], ['a', 'e'], ['a', 'i'], ['a', 'f'], ['a', 'h'], ['a', 'g'], ['b', 'i'], ['b', 'c'], ['b', 'j'], ['b', 'e'], ['b', 'h'], ['b', 'f'], ['c', 'b'], ['c', 'g'], ['c', 'f'], ['c', 'e'], ['c', 'j'], ['c', 'd'], ['d', 'a'], ['d', 'i'], ['d', 'h'], ['d', 'j'], ['d', 'c'], ['d', 'e'], ['e', 'a'], ['e', 'c'], ['e', 'b'], ['e', 'd'], ['e', 'f'], ['e', 'h'], ['f', 'g'], ['f', 'c'], ['f', 'a'], ['f', 'i'], ['f', 'e'], ['f', 'b'], ['g', 'f'], ['g', 'c'], ['g', 'h'], ['g', 'j'], ['g', 'a'], ['g', 'i'], ['h', 'd'], ['h', 'j'], ['h', 'g'], ['h', 'a'], ['h', 'e'], ['h', 'b'], ['i', 'b'], ['i', 'd'], ['i', 'j'], ['i', 'a'], ['i', 'f'], ['i', 'g'], ['j', 'i'], ['j', 'h'], ['j', 'b'], ['j', 'd'], ['j', 'g'], ['j', 'c']]
+
+#matches = [['a', 'j'], ['a', 'c'], ['a', 'h'], ['a', 'i'], ['a', 'g'], ['a', 'b'], ['b', 'c'], ['b', 'd'], ['b', 'a'], ['b', 'h'], ['b', 'e'], ['b', 'f'], ['c', 'b'], ['c', 'a'], ['c', 'f'], ['c', 'g'], ['c', 'j'], ['c', 'h'], ['d', 'b'], ['d', 'j'], ['d', 'e'], ['d', 'f'], ['d', 'g'], ['d', 'i'], ['e', 'h'], ['e', 'd'], ['e', 'b'], ['e', 'f'], ['e', 'g'], ['e', 'i'], ['f', 'c'], ['f', 'd'], ['f', 'i'], ['f', 'e'], ['f', 'g'], ['f', 'b'], ['g', 'c'], ['g', 'a'], ['g', 'j'], ['g', 'd'], ['g', 'f'], ['g', 'e'], ['h', 'e'], ['h', 'a'], ['h', 'c'], ['h', 'b'], ['h', 'j'], ['h', 'i'], ['i', 'a'], ['i', 'f'], ['i', 'h'], ['i', 'j'], ['i', 'd'], ['i', 'e'], ['j', 'a'], ['j', 'c'], ['j', 'd'], ['j', 'g'], ['j', 'h'], ['j', 'i']]
 
 ################# THE TOTAL VARIETY OF OPTIONS NEEDS TO BE EQUAL TO THE NUMBER OF ELEMENTS LEFT
 
 
-#stand = [[1],[5],[3],[4],[2],[6]]
-stand = [['a'],['b'],['c'],['d'],['e'],['f'],['g'],['h'],['i'],['j']]
+stand = [[1],[5],[3],[4],[2],[6]]
+#stand = [['a'],['b'],['c'],['d'],['e'],['f']]
+#stand = [['a'],['b'],['c'],['d'],['e'],['f'],['g'],['h'],['i'],['j']]
+
 pod = {}
 npod = {}
 for row in matches:
@@ -77,15 +82,87 @@ def mk_pair(player, i):
                 tpod[key].remove(nplayer)
         
         print "temp pl opt dict -after rem {}".format(tpod)
+        #=======================================================================
+        # for key in tpod:
+        #     if len(tpod[key])<1:
+        #         print "player {} with list: {}".format(key,tpod[key])
+        #         pos_to_move += 1
+        #         found_pair = False
+        #         break
+        # if not found_pair:
+        #     print "going to next player"
+        #     continue
+        #=======================================================================
+        
+        ##### COUNT THE TOTAL VARIETY OF OPTIONS IF TOTAL VARIETY < NUMBER OF PLAYERS LEFT WE'RE SCREWED
+        
+        ##### THERE CANNOT BE ....
+        #=======================================================================
+        # variety_list = []
+        # variety_count = 0
+        # for key in tpod:
+        #     variety_count +=1
+        #     for pl in tpod[key]:
+        #         if pl not in variety_list:
+        #             variety_list.append(pl)
+        # print "variety list = {} and variety count = {}".format(variety_list,variety_count)      
+        # 
+        # if len(variety_list) != variety_count:
+        #     found_pair = False
+        #     pos_to_move += 1;
+        #     print "not a good variety vs options left"
+        #     continue
+        # 
+        #=======================================================================
+        #### DOESNT WORK.. THERE CANNOT BE TWO SINGLE OPTION PLAYERS THAT REFER TO THE SAME PLAYER
+        no_good = False
+        #=======================================================================
+        # one_option_list = []
+        # for key in tpod:
+        #     if len(tpod[key])==1:
+        #        if tpod[key][0] in one_option_list:
+        #            no_good = True
+        #            break
+        #        else:
+        #            one_option_list.append(tpod[key][0])
+        # if no_good:
+        #     found_pair = False
+        #     pos_to_move += 1
+        #     print "a single player is the only option for multiple people"
+        #     continue
+        #=======================================================================
+        
+        option_dict = {}
         for key in tpod:
-            if len(tpod[key])<1:
-                print "player {} with list: {}".format(key,tpod[key])
-                pos_to_move += 1
-                found_pair = False
+            # number of options
+            n_options = len(tpod[key])
+            
+            # Check to see if there are any players left with no options
+            if not tpod[key]:
+                no_good = True
                 break
-        if not found_pair:
-            print "going to next player"
+            
+            try:
+               option_dict[n_options]
+               #now try to see if the option set is in the dict
+               if (set(tpod[key]) in option_dict[n_options]):
+                   #check to see if there already are n other elements with only the same n choices:
+                   if len(option_dict[n_options]) >= n_options:
+                       #not a good pair.. blow up;
+                       no_good = True
+                       break
+                   else:
+                       option_dict[n_options].append(set(tpod[key]))
+            except KeyError:
+                option_dict[n_options] = [set(tpod[key])]
+        
+        print "Option Dict = {}".format(option_dict)         
+        if no_good:
+            found_pair = False
+            pos_to_move += 1
+            print "a single player is the only option for multiple people"
             continue
+        
         
         pod.pop(player,None)
         pod.pop(nplayer,None)
