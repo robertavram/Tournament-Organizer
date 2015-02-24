@@ -51,9 +51,8 @@ def mk_pair(player, i, pod, npod,stand):
         if no_good:
             found_pair = False
             pos_to_move += 1
-            print "Pair cannot be set, would create a gridlock ({}, {})".format(player, nplayer)
+            print "({}, {}) Pair cannot be set, would create a gridlock ".format(player, nplayer)
             continue
-        
         
         pod.pop(player,None)
         pod.pop(nplayer,None)
@@ -62,7 +61,6 @@ def mk_pair(player, i, pod, npod,stand):
                 pod[key].remove(player)
             if nplayer in pod[key]:
                 pod[key].remove(nplayer)
-        
         
         my_pair = False   
         if found_pair:
@@ -75,6 +73,20 @@ def mk_pair(player, i, pod, npod,stand):
     return (my_pair, stand)
 
 def complex_pairing(matches, stand):
+    """ Takes a list of previous matches and the standing, 
+    returns a list of pairings making sure that not two players that played before will play again,
+    the pairings are done in a way in which players are paired with other players closer to their rank,
+    giving priority to closest in rank pairing from the best to the worst ranking players.
+    (it's considered to be more important that the best players are paired against each other
+     than worse performing players getting paired closest to their ranking) 
+     
+     (uses function mk_pair)
+     
+     Args:
+         matches: list of touples (previous player matches) eg: [(1,2),(1,3),(2,1),(3,1)]
+         stand: list of player ids according to rank (best first) eg [1, 2 ,3] (1 is the best)
+    """
+    
     print "STANDINGS ARE: {}".format(stand)
     # Create new vars Player Option Dictionary (pod) and player matches dictionary (npod)
     pod = {}
@@ -104,14 +116,15 @@ def complex_pairing(matches, stand):
     # Loop through all the players and find a pair for each.
     i = 0
     while i < (len(stand)):
-        player = stand[i];
+        player = stand[i]
         found_pair=False
         pos_to_move = 0
-        my_pair, stand = mk_pair(player, i, pod, npod, stand);
-        lop.append(my_pair)
-        i+=2
+        my_pair, stand = mk_pair(player, i, pod, npod, stand)
         if not my_pair:
             raise Error("Cannot find a possible pair for player {}".format(player))
+        lop.append(my_pair)
+        i+=2
+        
     
     return lop
 
