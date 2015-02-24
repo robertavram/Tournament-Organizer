@@ -326,7 +326,14 @@ def swissSupPairings(tournament="Default Tournament"):
     lid = [] 
     # List of player pairs
     lpp = []
-    
+    #player matches dict
+    p_matches_dict = {}
+    for row in matches:
+        if row[0] in p_matches_dict:
+            p_matches_dict[row[0]].append(row[1])
+        else:
+            p_matches_dict[row[0]]=[row[1]]
+            
     
     for row in standings:
         lid.append(row[0])
@@ -340,28 +347,13 @@ def swissSupPairings(tournament="Default Tournament"):
         # add a none list element right after it
         for i in range(len(lid)-1, -1, -1):
             elm = lid[i]
-            
-            # Query to see if this particular id has previously had a bye
-            c.execute("select matches, opponents from matches_vs_opp where id=%s", (elm,))
-            cresult = c.fetchone()
-            if (cresult) and (cresult[0] != cresult[1]):
-                continue;
+            if (p_matches_dict) and (None in p_matches_dict[elm]):
+                continue
             else:
                 bye_pair = (lid.pop(i),None)
                 break
-                #===============================================================
-                # if (i%2 > 0):
-                #     # Moving the element one back and adding the bye.
-                #     # This is to ensure that byes are never the first elements in the pair.
-                #     lid.insert(i-1, lid.pop(i))
-                #     lid.insert(i, None)
-                #     
-                #     break
-                # else:
-                #     # Just add a bye after the element.
-                #     lid.insert(i+1, None)
-                #     break
-                #===============================================================
+            
+            
         db.close()
     if not matches:    
         i = 0;
