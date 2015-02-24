@@ -58,7 +58,7 @@ def testReportMatches(tournament="Default Tournament", tot_players=4):
     registerPlayers(tournament, tot_players)
     
     rounds = int(ceil(log(tot_players, 2)))
-    
+    print "PLAYING {} ROUNDS".format(rounds)
     for i in range(rounds):
         pairings = swissSupPairings(tournament)
         gameon(pairings, tournament)
