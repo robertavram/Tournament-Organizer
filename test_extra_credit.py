@@ -26,7 +26,7 @@ def registerPlayers(tournament="Default Tournament", tplayers = 10):
 
 def gameon(lpp, tournament):
     """Play the games with a random winner or loser"""
-    print lpp;
+    print "Pairs for this round: \n  {} \n ".format(lpp)
     
     for pair in lpp:
         

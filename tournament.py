@@ -4,7 +4,7 @@
 #
 
 import psycopg2
-
+import pairing
 
 def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
@@ -182,27 +182,9 @@ def playerSupStandings(tournament="Default Tournament"):
     c.execute(query, (tournament,))
     stand = c.fetchall()
     
-    # Make a dict with all the players and their opponents
-    pod = {}
-    query2 = """
-             select id as player, opponent from opponent
-             """
-    c.execute(query2)
-    # Player opponent list - a list of all players and their opponents
-    pol = c.fetchall()
-    
-    
-    for row in pol:
-        if row[0] in pod:
-            pod[row[0]].append(row[1])
-        else:
-            pod[row[0]]=[row[1]]
-    
-    
-        
     
     db.close()
-    return result
+    return stand
 
 def setPairing(player1, player2, tournament="Default Tournament"):
     """Given 2 players registered in a tournament and the tournament name,
@@ -312,6 +294,18 @@ def swissPairings():
         i+=2
     return result
 
+def get_opponent_list(tournament = "Default Tournament"):
+    db = connect()
+    c = db.cursor()
+    query = """select opponent.id, opponent 
+        from opponent, round, tour 
+        where opponent.r_id = round.id and round.t_id = tour.id and tour.name = %s"""
+    c.execute(query,(tournament,))
+    result = c.fetchall()
+    db.close()
+    return result
+
+
 def swissSupPairings(tournament="Default Tournament"):
     """Returns a list of pairs of players for the next round of a match.
     
@@ -324,12 +318,15 @@ def swissSupPairings(tournament="Default Tournament"):
         id1: the first player's unique id in relation to the tournament
         id2: the second player's unique id in relation to the tournament
     """
+    print "\n NEW ROUND:"
+    bye_pair = False
     standings = playerSupStandings(tournament)
-    
+    matches = get_opponent_list(tournament)
     # List of player ids
     lid = [] 
     # List of player pairs
     lpp = []
+    
     
     for row in standings:
         lid.append(row[0])
@@ -350,29 +347,39 @@ def swissSupPairings(tournament="Default Tournament"):
             if (cresult) and (cresult[0] != cresult[1]):
                 continue;
             else:
-                if (i%2 > 0):
-                    # Moving the element one back and adding the bye.
-                    # This is to ensure that byes are never the first elements in the pair.
-                    lid.insert(i-1, lid.pop(i))
-                    lid.insert(i, None)
-                    break
-                else:
-                    # Just add a bye after the element.
-                    lid.insert(i+1, None)
-                    break
+                bye_pair = (lid.pop(i),None)
+                break
+                #===============================================================
+                # if (i%2 > 0):
+                #     # Moving the element one back and adding the bye.
+                #     # This is to ensure that byes are never the first elements in the pair.
+                #     lid.insert(i-1, lid.pop(i))
+                #     lid.insert(i, None)
+                #     
+                #     break
+                # else:
+                #     # Just add a bye after the element.
+                #     lid.insert(i+1, None)
+                #     break
+                #===============================================================
         db.close()
+    if not matches:    
+        i = 0;
+        while i < len(lid):
+             
+            # This try can be useful if somehow an uneven list gets passed through.
+            try: lid[i+1]
+            except:
+                raise Exception("The list has an uneven number of players, make sure that you add a bye")
+                break;
+            pair = (lid[i], lid[i+1])
+            lpp.append(pair)
+            i += 2
+    else:
+        lpp = pairing.complex_pairing(matches, lid)
     
-    i = 0;
-    while i < len(lid):
-        
-        # This try can be useful if somehow an uneven list gets passed through.
-        try: lid[i+1]
-        except:
-            raise Exception("The list has an uneven number of players, make sure that you add a bye")
-            break;
-        pair = (lid[i], lid[i+1])
-        lpp.append(pair)
-        i += 2
+    if bye_pair:
+        lpp.append(bye_pair)
         
     return lpp
 

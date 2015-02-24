@@ -6,7 +6,7 @@ def mk_pair(player, i, pod, npod,stand):
     while not found_pair:
         found_pair = True
         tpod = copy.deepcopy(pod)
-        nplayer = stand[i + 1 + pos_to_move][0]
+        nplayer = stand[i + 1 + pos_to_move]
         
         if nplayer in npod[player]:
             #print "player {} has already played {}".format(player, nplayer)
@@ -75,7 +75,7 @@ def mk_pair(player, i, pod, npod,stand):
     return (my_pair, stand)
 
 def complex_pairing(matches, stand):
-    
+    print "STANDINGS ARE: {}".format(stand)
     # Create new vars Player Option Dictionary (pod) and player matches dictionary (npod)
     pod = {}
     npod = {}
@@ -88,13 +88,15 @@ def complex_pairing(matches, stand):
     
     # Here we store all the options(values - list) that the player(key) has.
     for player in stand:
-        if not player[0] in pod:
-            pod[player[0]]=[];
+        if not player in pod:
+            pod[player]=[];
         for potential in stand:
-               if potential[0]==player[0]:
+               if potential==player:
                    continue
-               if not potential[0] in npod[player[0]]:
-                   pod[player[0]].append(potential[0])
+               if not potential in npod[player]:
+                   pod[player].append(potential)
+    
+    print "MATCH OPTIONS ARE: {}".format(pod)
     
     # New variable List Of Pairs(lop)
     lop = []
@@ -102,7 +104,7 @@ def complex_pairing(matches, stand):
     # Loop through all the players and find a pair for each.
     i = 0
     while i < (len(stand)):
-        player = stand[i][0];
+        player = stand[i];
         found_pair=False
         pos_to_move = 0
         my_pair, stand = mk_pair(player, i, pod, npod, stand);
@@ -113,9 +115,3 @@ def complex_pairing(matches, stand):
     
     return lop
 
-m1 = [['a', 'j'], ['a', 'c'], ['a', 'h'], ['a', 'i'], ['a', 'g'], ['a', 'b'], ['b', 'c'], ['b', 'd'], ['b', 'a'], ['b', 'h'], ['b', 'e'], ['b', 'f'], ['c', 'b'], ['c', 'a'], ['c', 'f'], ['c', 'g'], ['c', 'j'], ['c', 'h'], ['d', 'b'], ['d', 'j'], ['d', 'e'], ['d', 'f'], ['d', 'g'], ['d', 'i'], ['e', 'h'], ['e', 'd'], ['e', 'b'], ['e', 'f'], ['e', 'g'], ['e', 'i'], ['f', 'c'], ['f', 'd'], ['f', 'i'], ['f', 'e'], ['f', 'g'], ['f', 'b'], ['g', 'c'], ['g', 'a'], ['g', 'j'], ['g', 'd'], ['g', 'f'], ['g', 'e'], ['h', 'e'], ['h', 'a'], ['h', 'c'], ['h', 'b'], ['h', 'j'], ['h', 'i'], ['i', 'a'], ['i', 'f'], ['i', 'h'], ['i', 'j'], ['i', 'd'], ['i', 'e'], ['j', 'a'], ['j', 'c'], ['j', 'd'], ['j', 'g'], ['j', 'h'], ['j', 'i']]
-m2 = [['a', 'd'], ['a', 'e'], ['a', 'i'], ['a', 'f'], ['a', 'h'], ['a', 'g'], ['b', 'i'], ['b', 'c'], ['b', 'j'], ['b', 'e'], ['b', 'h'], ['b', 'f'], ['c', 'b'], ['c', 'g'], ['c', 'f'], ['c', 'e'], ['c', 'j'], ['c', 'd'], ['d', 'a'], ['d', 'i'], ['d', 'h'], ['d', 'j'], ['d', 'c'], ['d', 'e'], ['e', 'a'], ['e', 'c'], ['e', 'b'], ['e', 'd'], ['e', 'f'], ['e', 'h'], ['f', 'g'], ['f', 'c'], ['f', 'a'], ['f', 'i'], ['f', 'e'], ['f', 'b'], ['g', 'f'], ['g', 'c'], ['g', 'h'], ['g', 'j'], ['g', 'a'], ['g', 'i'], ['h', 'd'], ['h', 'j'], ['h', 'g'], ['h', 'a'], ['h', 'e'], ['h', 'b'], ['i', 'b'], ['i', 'd'], ['i', 'j'], ['i', 'a'], ['i', 'f'], ['i', 'g'], ['j', 'i'], ['j', 'h'], ['j', 'b'], ['j', 'd'], ['j', 'g'], ['j', 'c']]
-
-b = [['a'],['b'],['c'],['d'],['e'],['f'],['g'],['h'],['i'],['j']]
-
-print complex_pairing(m2,b)
