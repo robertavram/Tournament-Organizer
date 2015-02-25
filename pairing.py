@@ -84,7 +84,7 @@ def complex_pairing(matches, stand):
      
      Args:
          matches: list of touples (previous player matches) eg: [(1,2),(1,3),(2,1),(3,1)]
-         stand: list of player ids according to rank (best first) eg [1, 2 ,3] (1 is the best)
+         stand: list of player ids according to rank (best first) eg: [1, 2 ,3] - (1 is the best)
     """
     
     print "STANDINGS ARE: {}".format(stand)

@@ -12,7 +12,7 @@ def connect():
     return psycopg2.connect("dbname=tournament")
 
 
-def createTournament(tname=''):
+def createTournament(tname):
     """Creates a tournament or returns false if the tournament name exists in the Database"""
     
     # Using a unique Name and a unique ID might seem redundant, but this function
@@ -31,7 +31,7 @@ def createTournament(tname=''):
     
     try:
         c.execute(query, (tname,))
-    except:
+    except psycopg2.IntegrityError:
         print 'Tournament name already exists, please choose another name, meanwhile continuing'
         result = False
         
